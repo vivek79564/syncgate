@@ -13,7 +13,7 @@
  *   • Streaming token display during extraction
  */
 
-import { AnnaAppRuntime } from "/static/anna-apps/_sdk/latest/index.js";
+let AnnaAppRuntime = null;
 
 // ─── DEMO DATA ────────────────────────────────────────────────
 const DEMO_NOTES = {
@@ -163,6 +163,8 @@ let state = {
 // ─── ANNA RUNTIME ─────────────────────────────────────────────
 const annaReady = (async () => {
   try {
+    const mod = await import("/static/anna-apps/_sdk/latest/index.js");
+    AnnaAppRuntime = mod.AnnaAppRuntime;
     const anna = await AnnaAppRuntime.connect();
     window.anna = anna;
     state.annaConnected = true;
