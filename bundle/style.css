@@ -91,11 +91,14 @@ body::before {
 }
 .logo-icon {
   width: 30px; height: 30px;
-  background: linear-gradient(135deg, #6366f122, #818cf815);
-  border: 1px solid var(--accent-glow);
-  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
   display: flex; align-items: center; justify-content: center;
-  color: var(--accent-light);
+  animation: logo-pulse 3s infinite ease-in-out;
+}
+@keyframes logo-pulse {
+  0%, 100% { filter: drop-shadow(0 0 4px var(--accent-glow)); transform: scale(1); }
+  50% { filter: drop-shadow(0 0 10px var(--accent-light)); transform: scale(1.05); }
 }
 .logo-text {
   font-size: 0.95rem;
@@ -195,14 +198,6 @@ body::before {
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.5; }
-}
-.user-avatar {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), #a78bfa);
-  font-size: 0.65rem; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  color: #fff;
 }
 
 /* ─── LAYOUT ─────────────────────────────────────────────────── */
