@@ -1,0 +1,11 @@
+{
+  "slug": "syncgate",
+  "name": "SyncGate",
+  "version": "0.1.0",
+  "tagline": "AI proposes, humans dispose. A deterministic staging area for CRM data.",
+  "description": "SyncGate solves the 'AI Hallucination' problem in automated CRM workflows. Sales reps spend 30% of their day manually copying call notes into Salesforce/HubSpot — error-prone and incomplete. Connecting an LLM directly to a database is dangerous: hallucinated deal amounts and wrong pipeline stages destroy business data.\n\nSyncGate bridges the gap. The AI extracts structured data from unstructured meeting notes, then uses Anna's state management to render an editable 'Staging Area' UI — not a chat bubble. The human reviews the AI's work field-by-field, corrects any mistakes, and only then commits a safe, verified update.\n\n**What it demonstrates**\n\n- **Structured UI over chatbot**: AI output populates interactive React form fields, not a wall of text.\n- **Human-in-the-Loop approval gate**: Every AI-proposed change requires explicit human review before execution.\n- **Anna state + tools**: Uses `anna.llm.complete` for extraction and `anna.tools.invoke` for the mock CRM sync.\n- **Confidence indicators**: AI-generated fields are highlighted in amber — the human sees exactly what was guessed.\n\n**How to use**\n\nPaste any raw meeting notes into the input area and click 'Extract with AI'. The AI extracts client name, deal name, amount, next action date, and follow-up tasks into an editable staging form. Review, correct if needed, then click 'Approve & Sync to CRM'.",
+  "category": "productivity",
+  "pricing_model": "free",
+
+  "bundled_executas": {}
+}

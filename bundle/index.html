@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SyncGate — CRM Staging Area</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="AI proposes, humans dispose. A deterministic staging area for CRM data — powered by Anna AI." />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+
+    <!-- ── TOP NAV ── -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4z" fill="currentColor" opacity="0.8"/>
+              <rect x="3" y="8" width="9" height="3" rx="1" fill="currentColor"/>
+              <rect x="3" y="13" width="6" height="2" rx="1" fill="currentColor" opacity="0.6"/>
+              <circle cx="16" cy="14" r="3" fill="#22c55e"/>
+              <path d="M14.5 14l1 1 2-2" stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="logo-text">SyncGate</span>
+          <span class="version-badge">v1.0</span>
+        </div>
+      </div>
+      <div class="topbar-center">
+        <div class="stage-bar">
+          <div class="stage active" id="stage-input">
+            <div class="stage-num">1</div>
+            <div class="stage-label">Input</div>
+          </div>
+          <div class="stage-line"></div>
+          <div class="stage" id="stage-extract">
+            <div class="stage-num">2</div>
+            <div class="stage-label">Extract</div>
+          </div>
+          <div class="stage-line"></div>
+          <div class="stage" id="stage-review">
+            <div class="stage-num">3</div>
+            <div class="stage-label">Review</div>
+          </div>
+          <div class="stage-line"></div>
+          <div class="stage" id="stage-sync">
+            <div class="stage-num">4</div>
+            <div class="stage-label">Synced</div>
+          </div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-btn" id="history-toggle-btn" title="Sync History">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+            <path d="M8 2a6 6 0 100 12A6 6 0 008 2z" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          History
+          <span class="history-count" id="history-count" hidden>0</span>
+        </button>
+        <div class="crm-badge">
+          <span class="crm-dot"></span>
+          <span>Salesforce</span>
+        </div>
+        <div class="user-avatar">SR</div>
+      </div>
+    </header>
+
+    <!-- ── LAYOUT WRAPPER ── -->
+    <div class="layout" id="main-layout">
+
+      <!-- ── MAIN CONTENT ── -->
+      <main class="app-body" id="app-body">
+
+        <!-- ── PANEL A: INPUT ── -->
+        <section class="panel" id="panel-input">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" class="panel-icon">
+                <path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v1H2V3z" fill="currentColor" opacity="0.5"/>
+                <rect x="2" y="5" width="12" height="9" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/>
+                <path d="M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+              Meeting Notes
+            </div>
+            <div class="demo-chips">
+              <span class="chip-label">Demo:</span>
+              <button class="chip" id="demo-enterprise" type="button">Enterprise Deal</button>
+              <button class="chip" id="demo-startup" type="button">Startup Call</button>
+              <button class="chip" id="demo-renewal" type="button">Renewal</button>
+            </div>
+          </div>
+
+          <textarea
+            id="notes-input"
+            class="notes-textarea"
+            placeholder="Paste raw meeting notes, call transcript, email thread, or Slack summary…"
+            rows="8"
+          ></textarea>
+          <div class="char-count-row">
+            <span class="char-count" id="char-count">0 characters</span>
+            <button class="btn-link" id="clear-btn" type="button">Clear</button>
+          </div>
+
+          <!-- ── CUSTOM PROMPT SECTION ── -->
+          <details class="custom-prompt-section" id="custom-prompt-details">
+            <summary class="custom-prompt-toggle">
+              <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/>
+                <path d="M5.5 5.5a1.5 1.5 0 012.83.75c0 1-1.33 1.25-1.33 2.25" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                <circle cx="7" cy="10.5" r="0.6" fill="currentColor"/>
+              </svg>
+              Custom Extraction Rules
+              <span class="badge-new">PRO</span>
+              <svg class="toggle-arrow" width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+            </summary>
+            <div class="custom-prompt-body">
+              <p class="custom-prompt-hint">
+                Add company-specific extraction rules appended to the AI system prompt.
+                Use this to teach the AI your CRM field definitions, deal stages, or naming conventions.
+              </p>
+              <textarea
+                id="custom-prompt-input"
+                class="custom-prompt-textarea"
+                rows="4"
+                placeholder="Examples:
+• Our deal stages are: Discovery, Qualification, Proposal, Negotiation, Closed Won
+• Currency is always USD unless stated otherwise
+• 'POC' means Proof of Concept — always flag as action item
+• Client names should be in 'First Last, Company' format"
+              ></textarea>
+              <div class="custom-prompt-footer">
+                <span class="custom-prompt-status" id="custom-prompt-status">No custom rules set</span>
+                <button class="btn-ghost btn-xs" id="save-custom-prompt-btn" type="button">Save Rules</button>
+                <button class="btn-ghost btn-xs" id="clear-custom-prompt-btn" type="button">Clear</button>
+              </div>
+
+              <!-- ── CUSTOM FIELDS CONFIGURATOR ── -->
+              <div class="custom-fields-section">
+                <div class="custom-fields-header">
+                  <span class="custom-fields-label">Extra CRM Fields to Extract</span>
+                  <button class="btn-ghost btn-xs" id="add-custom-field-btn" type="button">+ Add Field</button>
+                </div>
+                <div class="custom-fields-list" id="custom-fields-list">
+                  <!-- Dynamic custom fields injected here -->
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <div class="input-footer">
+            <div class="input-footer-left">
+              <div class="ai-status" id="ai-status">
+                <span class="ai-status-dot"></span>
+                <span id="ai-status-text">Anna AI Ready</span>
+              </div>
+            </div>
+            <button class="btn-primary" id="extract-btn" type="button">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                <path d="M8 1l1.5 4.5H14l-3.75 2.73 1.43 4.4L8 10.1l-3.68 2.63 1.43-4.4L2 5.5h4.5L8 1z" fill="currentColor"/>
+              </svg>
+              Extract with AI
+            </button>
+          </div>
+
+          <!-- ── STREAMING OUTPUT ── -->
+          <div class="stream-panel" id="stream-panel" hidden>
+            <div class="stream-header">
+              <div class="stream-title">
+                <div class="stream-dot"></div>
+                AI Processing…
+              </div>
+              <span class="stream-model" id="stream-model-label"></span>
+            </div>
+            <pre class="stream-output" id="stream-output"></pre>
+          </div>
+        </section>
+
+        <!-- ── PANEL B: STAGING FORM ── -->
+        <section class="panel staging-panel" id="panel-staging" hidden>
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" class="panel-icon ai-icon">
+                <path d="M3 4h10M3 7h7M3 10h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                <circle cx="13" cy="10" r="2.5" stroke="#818cf8" stroke-width="1.3"/>
+                <path d="M12 10h2M13 9v2" stroke="#818cf8" stroke-width="1.1" stroke-linecap="round"/>
+              </svg>
+              AI Staging Area
+            </div>
+            <div class="staging-header-right">
+              <span class="ai-badge">AI Generated</span>
+              <button class="btn-ghost btn-xs" id="chat-toggle-btn" type="button">
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                  <path d="M2 2h10a1 1 0 011 1v6a1 1 0 01-1 1H8l-3 2v-2H2a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3"/>
+                </svg>
+                Ask AI
+              </button>
+              <button class="btn-ghost btn-xs" id="export-btn" type="button">
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                  <path d="M7 2v7M4 7l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                </svg>
+                Export
+              </button>
+            </div>
+          </div>
+
+          <div class="confidence-bar-wrapper">
+            <div class="confidence-label">
+              <span>AI Confidence</span>
+              <div class="confidence-right">
+                <span id="confidence-pct">—</span>
+                <button class="confidence-explain-btn" id="explain-btn" title="Why this score?">?</button>
+              </div>
+            </div>
+            <div class="confidence-track">
+              <div class="confidence-fill" id="confidence-fill"></div>
+            </div>
+            <div class="confidence-explainer" id="confidence-explainer" hidden></div>
+          </div>
+
+          <div class="form-grid">
+            <!-- Client Name -->
+            <div class="field-group">
+              <label class="field-label" for="field-client">
+                Client Name
+                <span class="ai-tag" id="tag-client">AI</span>
+              </label>
+              <div class="field-input-wrap">
+                <input type="text" id="field-client" class="field-input ai-value" placeholder="Company or contact name" />
+                <button class="field-regen-btn" data-field="clientName" title="Re-extract this field">
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                    <path d="M10 6A4 4 0 112 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                    <path d="M10 3v3h-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Deal Name -->
+            <div class="field-group">
+              <label class="field-label" for="field-deal">
+                Deal Name
+                <span class="ai-tag" id="tag-deal">AI</span>
+              </label>
+              <div class="field-input-wrap">
+                <input type="text" id="field-deal" class="field-input ai-value" placeholder="e.g. Acme Corp – Q3 Enterprise License" />
+                <button class="field-regen-btn" data-field="dealName" title="Re-extract this field">
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                    <path d="M10 6A4 4 0 112 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                    <path d="M10 3v3h-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Deal Amount -->
+            <div class="field-group field-group--half">
+              <label class="field-label" for="field-amount">
+                Deal Amount ($)
+                <span class="ai-tag" id="tag-amount">AI</span>
+              </label>
+              <div class="field-input-wrap amount-wrap">
+                <span class="currency-symbol">$</span>
+                <input type="number" id="field-amount" class="field-input ai-value field-amount" placeholder="0" min="0" />
+                <button class="field-regen-btn" data-field="dealAmount" title="Re-extract">
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                    <path d="M10 6A4 4 0 112 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                    <path d="M10 3v3h-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Next Action Date -->
+            <div class="field-group field-group--half">
+              <label class="field-label" for="field-date">
+                Next Action Date
+                <span class="ai-tag" id="tag-date">AI</span>
+              </label>
+              <div class="field-input-wrap">
+                <input type="text" id="field-date" class="field-input ai-value" placeholder="e.g. June 28th, Next Tuesday" />
+                <button class="field-regen-btn" data-field="nextActionDate" title="Re-extract">
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                    <path d="M10 6A4 4 0 112 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                    <path d="M10 3v3h-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Deal Stage (new!) -->
+            <div class="field-group">
+              <label class="field-label" for="field-stage">
+                Deal Stage
+                <span class="ai-tag" id="tag-stage">AI</span>
+              </label>
+              <div class="field-input-wrap">
+                <select id="field-stage" class="field-input field-select ai-value">
+                  <option value="">— Select Stage —</option>
+                  <option value="Discovery">Discovery</option>
+                  <option value="Qualification">Qualification</option>
+                  <option value="Proposal">Proposal</option>
+                  <option value="Negotiation">Negotiation</option>
+                  <option value="Closed Won">Closed Won</option>
+                  <option value="Closed Lost">Closed Lost</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── CUSTOM EXTRACTED FIELDS ── -->
+          <div id="extra-fields-staging" class="extra-fields-staging" hidden>
+            <!-- Dynamically injected -->
+          </div>
+
+          <!-- ── ACTION ITEMS ── -->
+          <div class="action-items-section">
+            <div class="action-items-header">
+              <label class="field-label">
+                Action Items
+                <span class="ai-tag ai-tag-visible">AI</span>
+              </label>
+              <div class="action-items-controls">
+                <button class="btn-ghost btn-xs" id="regen-tasks-btn" type="button" title="Re-generate all action items">
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                    <path d="M10 6A4 4 0 112 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                    <path d="M10 3v3h-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                  </svg>
+                  Re-extract
+                </button>
+                <button class="btn-ghost btn-xs" id="add-task-btn" type="button">+ Add</button>
+              </div>
+            </div>
+            <div class="task-list" id="task-list"></div>
+          </div>
+
+          <!-- ── AI REASONING ── -->
+          <div class="reasoning-section" id="reasoning-section" hidden>
+            <div class="reasoning-header">
+              <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                <circle cx="7" cy="7" r="5.5" stroke="#818cf8" stroke-width="1.3"/>
+                <path d="M7 4v3.5" stroke="#818cf8" stroke-width="1.3" stroke-linecap="round"/>
+                <circle cx="7" cy="10" r="0.6" fill="#818cf8"/>
+              </svg>
+              <span>AI Extraction Reasoning</span>
+              <button class="btn-link btn-xs" id="hide-reasoning-btn">hide</button>
+            </div>
+            <div class="reasoning-body" id="reasoning-body"></div>
+          </div>
+
+          <!-- ── CHANGE SUMMARY ── -->
+          <div class="change-summary" id="change-summary" hidden>
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+              <path d="M7 1l1.2 3.8H12l-3.1 2.25 1.18 3.64L7 8.5 3.92 10.7l1.18-3.64L2 4.8h3.8L7 1z" fill="#f59e0b"/>
+            </svg>
+            You corrected <span id="edit-count">0</span> field(s) — human override logged
+          </div>
+
+          <div class="staging-footer">
+            <button class="btn-ghost" id="discard-btn" type="button">← Start Over</button>
+            <div class="staging-footer-right">
+              <button class="btn-ghost" id="show-reasoning-btn" type="button">
+                <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                  <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/>
+                  <path d="M7 4v3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                </svg>
+                Why this?
+              </button>
+              <button class="btn-success" id="approve-btn" type="button">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Approve &amp; Sync to CRM
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── PANEL C: SUCCESS ── -->
+        <section class="panel success-panel" id="panel-success" hidden>
+          <div class="success-animation">
+            <div class="success-ring">
+              <svg width="60" height="60" viewBox="0 0 64 64" fill="none">
+                <circle cx="32" cy="32" r="28" stroke="#22c55e" stroke-width="3" stroke-dasharray="176" stroke-dashoffset="176" class="success-circle"/>
+                <path d="M20 32l9 9L44 22" stroke="#22c55e" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="40" stroke-dashoffset="40" class="success-check"/>
+              </svg>
+            </div>
+            <h2 class="success-title">Synced to Salesforce!</h2>
+            <p class="success-sub">Verified by human review. Zero hallucinations committed.</p>
+          </div>
+
+          <div class="sync-receipt" id="sync-receipt"></div>
+
+          <div class="success-footer">
+            <button class="btn-ghost" id="new-note-btn" type="button">Process Another Note</button>
+            <button class="btn-ghost" id="export-success-btn" type="button">
+              <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                <path d="M7 2v7M4 7l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+              Export JSON
+            </button>
+            <button class="btn-primary" id="view-crm-btn" type="button">View in Salesforce →</button>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- ── AI CHAT SIDEBAR ── -->
+      <aside class="chat-sidebar" id="chat-sidebar" hidden>
+        <div class="chat-header">
+          <div class="chat-title">
+            <div class="chat-ai-dot"></div>
+            Ask AI about this extraction
+          </div>
+          <button class="btn-ghost btn-xs" id="chat-close-btn" type="button">✕</button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-welcome">
+            <div class="chat-welcome-icon">🤖</div>
+            <p>I've read the meeting notes. Ask me anything about the extraction — I can:</p>
+            <ul>
+              <li>Explain why I chose a specific value</li>
+              <li>Re-interpret an ambiguous field</li>
+              <li>Suggest a better deal stage</li>
+              <li>Identify risks or red flags in the notes</li>
+            </ul>
+          </div>
+        </div>
+        <div class="chat-quick-prompts" id="chat-quick-prompts">
+          <button class="quick-prompt" data-prompt="Why did you choose this deal amount? Is there any uncertainty?">💰 Explain deal amount</button>
+          <button class="quick-prompt" data-prompt="What deal stage best fits these notes? Explain your reasoning.">📊 Suggest deal stage</button>
+          <button class="quick-prompt" data-prompt="Are there any red flags, risks, or blockers mentioned in the notes?">⚠️ Identify risks</button>
+          <button class="quick-prompt" data-prompt="What additional action items might I have missed?">✅ More action items</button>
+        </div>
+        <div class="chat-input-row">
+          <textarea id="chat-input" class="chat-input" placeholder="Ask anything about the extracted data…" rows="2"></textarea>
+          <button class="chat-send-btn" id="chat-send-btn" type="button">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M2 8l12-6-6 12V8H2z" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+        <div class="chat-footer">
+          <span class="chat-model-label" id="chat-model-label">via anna.llm.complete</span>
+        </div>
+      </aside>
+
+    </div><!-- /.layout -->
+
+    <!-- ── HISTORY DRAWER ── -->
+    <div class="history-drawer" id="history-drawer" hidden>
+      <div class="history-drawer-header">
+        <span class="history-title">Sync History (This Session)</span>
+        <button class="btn-ghost btn-xs" id="history-close-btn" type="button">✕</button>
+      </div>
+      <div class="history-list" id="history-list">
+        <div class="history-empty">No synced records yet</div>
+      </div>
+    </div>
+
+    <!-- ── FIELD RE-EXTRACT MODAL ── -->
+    <div class="modal-overlay" id="regen-modal" hidden>
+      <div class="modal">
+        <div class="modal-header">
+          <span class="modal-title" id="regen-modal-title">Re-extract Field</span>
+          <button class="btn-ghost btn-xs" id="regen-modal-close">✕</button>
+        </div>
+        <p class="modal-hint">Give the AI a hint about what to look for:</p>
+        <textarea id="regen-hint-input" class="field-input" rows="3" placeholder="e.g. 'The amount was mentioned after the discount', 'The client name is the person who sent the email'"></textarea>
+        <div class="modal-footer">
+          <button class="btn-ghost" id="regen-cancel-btn">Cancel</button>
+          <button class="btn-primary" id="regen-confirm-btn">Re-extract with AI</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── LOADING OVERLAY ── -->
+    <div class="loading-overlay" id="loading-overlay" hidden>
+      <div class="loading-card">
+        <div class="spinner-orbit"><div class="orbit-dot"></div></div>
+        <div class="loading-text" id="loading-text">Extracting data with AI…</div>
+        <div class="loading-sub" id="loading-sub">Reading your meeting notes</div>
+      </div>
+    </div>
+
+    <!-- ── TOAST ── -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="anna-tool-ids.js"></script>
+    <script src="app.js" type="module"></script>
+  </body>
+</html>

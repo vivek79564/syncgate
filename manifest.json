@@ -1,0 +1,48 @@
+{
+  "schema": 2,
+  "permissions": [
+    "chat.write_message",
+    "tools.invoke"
+  ],
+  "required_executas": [],
+  "optional_executas": [],
+  "system_prompt_addendum": "The user has the SyncGate app open. SyncGate is a CRM staging area that extracts structured data from unstructured sales meeting notes using AI and presents it for human review before committing to a CRM. When the user pastes meeting notes, extract: clientName, dealName, dealAmount (number only, no currency), nextActionDate, and actionItems (array of strings). Return ONLY valid JSON, no markdown, no preamble. If a field is missing, use null. For actionItems, use an empty array [] if none exist.",
+  "tags": ["productivity", "crm", "sales", "human-in-the-loop", "ai-workflows"],
+  "ui": {
+    "bundle": {
+      "format": "static-spa",
+      "entry": "index.html",
+      "external_origins": []
+    },
+    "views": [
+      {
+        "name": "main",
+        "title": "SyncGate — CRM Staging Area",
+        "default": true,
+        "entry": "index.html",
+        "min_size": { "w": 520, "h": 700 },
+        "default_size": { "w": 760, "h": 900 },
+        "resizable": true,
+        "movable": true,
+        "single_instance": true
+      }
+    ],
+    "host_api": {
+      "llm": ["complete"],
+      "chat": ["write_message"],
+      "window": ["set_title"],
+      "agent": {
+        "session": { "auto": false },
+        "tools": []
+      }
+    },
+    "csp_overrides": {
+      "script-src": ["'self'"]
+    },
+    "state_merge": "last_writer_wins"
+  },
+  "dev": {
+    "fixtures": ["fixtures/*.jsonl"],
+    "user_id": 1
+  }
+}
